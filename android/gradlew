@@ -1,0 +1,13 @@
+#!/bin/sh
+# Small pinned Gradle bootstrap; Android Studio can also open this directory directly.
+set -eu
+VERSION=8.10.2
+BASE="${GRADLE_USER_HOME:-$HOME/.gradle}/ds-mobile-gradle-$VERSION"
+if [ ! -x "$BASE/gradle-$VERSION/bin/gradle" ]; then
+ mkdir -p "$BASE"
+ curl -fL "https://services.gradle.org/distributions/gradle-$VERSION-bin.zip" -o "$BASE/gradle.zip"
+ curl -fL "https://services.gradle.org/distributions/gradle-$VERSION-bin.zip.sha256" -o "$BASE/gradle.sha256"
+ printf '%s  %s\n' "$(cat "$BASE/gradle.sha256")" "$BASE/gradle.zip" | sha256sum -c -
+ unzip -q "$BASE/gradle.zip" -d "$BASE"
+fi
+exec "$BASE/gradle-$VERSION/bin/gradle" "$@"

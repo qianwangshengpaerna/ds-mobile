@@ -1,0 +1,30 @@
+.sdk/
+.signing/
+node_modules/
+upstream/node_modules/
+upstream/.tests/
+upstream/dist/
+android/manual-build/
+android/.gradle/
+android/local.properties
+android/app/build/
+android/app/src/main/assets/web/
+tests/bundle.cjs
+*.apk
+*.idsig
+
+# Local credentials and signing material
+.env
+.env.*
+!.env.example
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.key
+*.pem
+.credentials*
+.DS_Store
+
+# Published APK builds
+!downloads/*.apk

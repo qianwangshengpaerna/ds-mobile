@@ -1,0 +1,9 @@
+plugins { id 'com.android.application' }
+def appVersion = new groovy.json.JsonSlurper().parse(file('../../version.json'))
+android {
+ namespace 'app.dsmobile'
+ compileSdk 35
+ defaultConfig { applicationId 'app.dsmobile'; minSdk 26; targetSdk 35; versionCode appVersion.version_code; versionName appVersion.version_name }
+ compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+ buildTypes { release { minifyEnabled false } }
+}

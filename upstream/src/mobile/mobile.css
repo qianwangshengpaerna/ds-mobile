@@ -1,0 +1,297 @@
+.ds-nav {
+  display: flex;
+  gap: 5px;
+  padding: 8px 12px 14px;
+  flex-wrap: wrap;
+}
+.ds-nav button,
+.ds-provider {
+  border: 1px solid var(--dsw-alias-border-primary, #e5e7eb);
+  background: var(--dsw-alias-bg-base, #fff);
+  color: var(--dsw-alias-label-primary, #172033);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-size: 12px;
+}
+.ds-provider {
+  margin: auto;
+  display: flex;
+  gap: 7px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.ds-provider span {
+  color: #7d889d;
+}
+.ds-hub {
+  width: 560px;
+  max-width: 100%;
+}
+.ds-hub-body {
+  padding: 4px 4px 20px;
+  max-height: 72dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.ds-hub-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 17px 0;
+  font-size: 13px;
+  font-weight: 550;
+}
+.ds-hub-body input,
+.ds-hub-body textarea,
+.ds-hub-body select {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #dfe4ee;
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-base, #fff);
+  color: var(--dsw-alias-label-primary, #172033);
+  font: inherit;
+  outline-offset: 3px;
+}
+.ds-hub-body textarea {
+  resize: vertical;
+}
+.ds-hub-body input:focus,
+.ds-hub-body textarea:focus {
+  outline-color: #4d6bfe;
+}
+.ds-muted {
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--dsw-alias-label-tertiary, #7d889d);
+}
+.ds-segment {
+  display: flex;
+  background: #eef1f8;
+  padding: 4px;
+  border-radius: 14px;
+  gap: 4px;
+  margin: 20px 0;
+}
+.ds-segment button {
+  flex: 1;
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: #72809b;
+  cursor: pointer;
+}
+.ds-segment .active {
+  background: #fff;
+  color: #365bdf;
+  box-shadow: 0 2px 8px #20315312;
+}
+.ds-primary,
+.ds-outline {
+  display: block;
+  width: 100%;
+  padding: 13px 16px;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid #dfe4ee;
+  cursor: pointer;
+  font: inherit;
+}
+.ds-primary {
+  background: #4d6bfe;
+  border-color: #4d6bfe;
+  color: #fff;
+}
+.ds-outline {
+  background: transparent;
+  color: var(--dsw-alias-label-primary, #172033);
+}
+.ds-hub-body button:disabled {
+  opacity: 0.45;
+  cursor: wait;
+}
+.ds-projects > button,
+.ds-project-row {
+  display: flex;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  margin: 4px 0;
+}
+.ds-projects button {
+  padding: 12px;
+  border: 0;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+  color: inherit;
+}
+.ds-project-row > button:first-child {
+  flex: 1;
+  text-align: left;
+}
+.ds-projects .active {
+  background: #edf1ff;
+  color: #3e61ea;
+}
+.ds-projects span {
+  float: right;
+  padding-left: 12px;
+  color: #8390a7;
+}
+.ds-project-row {
+  align-items: center;
+}
+.ds-project-row button {
+  font-size: 12px;
+}
+.ds-plugin {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  border: 1px solid #e6eaf2;
+  border-radius: 14px;
+  padding: 12px;
+  margin: 12px 0;
+}
+.ds-plugin > div {
+  flex: 1;
+  min-width: 0;
+}
+.ds-plugin small {
+  display: block;
+  margin-top: 5px;
+  color: #7d889d;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ds-plugin button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  background: #edf1ff;
+  color: #3e61ea;
+}
+.ds-result,
+.ds-hub-body pre {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: var(--dsw-alias-bg-base, #f5f6fa);
+  padding: 12px;
+  border-radius: 10px;
+  max-height: 220px;
+  overflow: auto;
+  font: 12px/1.7 monospace;
+}
+.ds-welcome {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: auto 0;
+  text-align: center;
+}
+.ds-logo {
+  height: 64px;
+  width: 64px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #4d6bfe;
+  border-radius: 23px;
+  box-shadow: 0 8px 30px #4d6bfe25;
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -2px;
+}
+.ds-welcome h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.8px;
+  margin: 8px 0 0;
+}
+.ds-welcome p {
+  font-size: 13px;
+  color: #8892a6;
+  line-height: 1.8;
+  margin: 0;
+}
+.ds-shortcuts {
+  display: flex;
+  gap: 10px;
+  margin-top: 13px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.ds-shortcuts button {
+  padding: 10px 14px;
+  border: 1px solid #e7eaf1;
+  border-radius: 12px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.ds-project-banner {
+  font-size: 11px;
+  text-align: center;
+  color: #8490a7;
+  padding: 4px 8px;
+}
+.ds-file-label {
+  border: 1px solid #dfe4ee;
+  border-radius: 12px;
+  padding: 12px;
+}
+.ds-file-label input {
+  border: 0;
+  padding: 0;
+  font-size: 12px;
+}
+
+.ds-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ds-actions > button {
+  flex: 1;
+}
+.ds-export {
+  margin: 20px 0 8px;
+  padding: 14px;
+  border: 1px solid #e4e8f0;
+  border-radius: 14px;
+}
+.ds-export h3 {
+  margin: 0;
+  font-size: 14px;
+}
+.ds-export button {
+  font-size: 13px;
+}
+.ds-provider {
+  max-width: 140px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ds-input-cache {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  padding: 3px 16px 9px;
+  color: var(--dsw-alias-label-tertiary, #8590a5);
+  font-size: 10px;
+  line-height: 15px;
+  cursor: default;
+}
+.ds-cache-unit {
+  margin-left: auto;
+}
