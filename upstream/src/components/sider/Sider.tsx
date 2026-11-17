@@ -1,7 +1,7 @@
 import { MobileNav } from '../../mobile/MobileHub.js'
 import { useMobile } from '../../mobile/state.js'
 import clsx from 'clsx'
-import { useEffect, useMemo, useState } from 'react'
+import { memo, useEffect, useLayoutEffect, useMemo, useRef, useState, type RefObject } from 'react'
 import { useTranslate } from '../../i18n/index.js'
 import { IconPanelLeftOutline16, IconSettingsOutline16, NewChatIcon } from '../base/icons.js'
 import { setSiderCollapsed } from '../../services/settings.js'
@@ -13,12 +13,12 @@ import { IconButton } from '../base/IconButton.js'
 import { Modal } from '../base/Modal.js'
 import { showToast } from '../base/toastState.js'
 import { openSettings } from '../settings/settingsDialogState.js'
-import { closeMobileSider, useMobileSider } from './mobileSiderState.js'
+import { closeMobileSider, mobileSiderId, useMobileSider } from './mobileSiderState.js'
 import { SessionItem } from './SessionItem.js'
 import styles from './Sider.module.css'
 
 /** 展开的侧边栏：名称与收起按钮、开启新对话、按时间分组的会话列表、底部设置；移动端放在抽屉里，收起按钮关闭抽屉 */
-export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
+export const Sider = memo(function Sider({ mobile = false }: { mobile?: boolean }) {
   const t = useTranslate()
   const sessions = useChatStore((state) => state.sessions)
   const activeId = useChatStore((state) => state.activeId)
@@ -151,20 +151,75 @@ export const Sider = ({ mobile = false }: { mobile?: boolean }) => {
       ) : null}
     </div>
   )
-}
+})
 
-/** 移动端抽屉：浮在页面上方，点空白区域关闭。 */
-export const MobileSider = () => {
+/** 保留抽屉及其滚动位置，让关闭动画和快速反向切换都能连续播放。 */
+export const MobileSider = ({ contentRef }: { contentRef: RefObject<HTMLElement> }) => {
+  const t = useTranslate()
   const open = useMobileSider((state) => state.open)
-  if (!open) {
-    return null
-  }
+  const drawerRef = useRef<HTMLElement>(null)
+  const wasOpen = useRef(false)
+
+  useLayoutEffect(() => {
+    const drawer = drawerRef.current
+    if (!drawer) {
+      return
+    }
+    const restoreFocus = wasOpen.current && !open
+    wasOpen.current = open
+    drawer.inert = !open
+    const content = contentRef.current
+    if (!content) {
+      return
+    }
+    content.inert = open
+    if (open) {
+      drawer.focus({ preventScroll: true })
+    } else if (
+      restoreFocus &&
+      (drawer.contains(document.activeElement) || document.activeElement === document.body)
+    ) {
+      content
+        .querySelector<HTMLButtonElement>(`button[aria-controls="${mobileSiderId}"]`)
+        ?.focus({ preventScroll: true })
+    }
+    return () => {
+      content.inert = false
+    }
+  }, [contentRef, open])
+
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape' || event.defaultPrevented || event.isComposing) {
+        return
+      }
+      // 弹窗和会话菜单位于抽屉上方，由它们先响应返回键。
+      if (document.querySelector(`[role="dialog"]:not(#${mobileSiderId}), [role="menu"]`)) {
+        return
+      }
+      closeMobileSider()
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open])
+
   return (
-    <>
-      <div className={styles.drawerMask} onClick={closeMobileSider} />
-      <div className={styles.drawer}>
+    <div className={styles.drawerLayer} data-open={open}>
+      <div className={styles.drawerMask} aria-hidden="true" onClick={closeMobileSider} />
+      <aside
+        ref={drawerRef}
+        id={mobileSiderId}
+        className={styles.drawer}
+        tabIndex={-1}
+        role={open ? 'dialog' : undefined}
+        aria-modal={open || undefined}
+        aria-label={t('appName')}
+      >
         <Sider mobile />
-      </div>
-    </>
+      </aside>
+    </div>
   )
 }

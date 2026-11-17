@@ -31,6 +31,83 @@ const output=process.env.DS_LAYOUT_OUTPUT||path.join(root,'..','qa-keyboard');
   await page.getByText('灵感，从这里开始').waitFor();
   assert.equal(await page.locator('html').getAttribute('data-ds-native'),'true');
   const settle=()=>page.evaluate(()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))));
+  const sidebarToggle = page.getByRole('button', {name:'打开边栏', exact:true});
+  const sidebarId = await sidebarToggle.getAttribute('aria-controls');
+  assert.ok(sidebarId, 'sidebar toggle must identify the drawer');
+  const sidebar = page.locator(`#${sidebarId}`);
+
+  async function recordSidebarMotion(open) {
+   return page.evaluate(async ({id,open}) => {
+    const drawer = document.getElementById(id);
+    const trigger = document.querySelector(`button[aria-controls="${id}"]`);
+    const backdrop = drawer.previousElementSibling;
+    const main = document.querySelector('main');
+    const measure = () => ({
+     x: drawer.getBoundingClientRect().x,
+     backdrop: Number(getComputedStyle(backdrop).opacity),
+     visibility: getComputedStyle(drawer).visibility,
+     mainWidth: main.getBoundingClientRect().width,
+    });
+    const frames = [measure()];
+    (open ? trigger : backdrop).click();
+    for (let i = 0; i < 40; i++) {
+     await new Promise(resolve => requestAnimationFrame(resolve));
+     const frame = measure();
+     frames.push(frame);
+     if (open ? frame.x === 0 && frame.backdrop === 1 : frame.visibility === 'hidden') break;
+    }
+    return frames;
+   }, {id:sidebarId,open});
+  }
+
+  const opening = await recordSidebarMotion(true);
+  const closedX = opening[0].x;
+  const midSlide = (frame) => frame.x > closedX + 1 && frame.x < -1;
+  assert.ok(opening.some(midSlide), 'drawer skipped the opening slide');
+  assert.ok(opening.some(frame => frame.backdrop > 0 && frame.backdrop < 1), 'backdrop skipped the fade');
+  assert.equal(opening.at(-1).x, 0);
+  assert.equal(await page.locator('main').evaluate(el => el.inert), true);
+  assert.equal(await sidebar.getAttribute('role'), 'dialog');
+
+  const closing = await recordSidebarMotion(false);
+  assert.ok(closing.some(midSlide), 'drawer skipped the closing slide');
+  assert.equal(closing.at(-1).visibility, 'hidden');
+  assert.ok([...opening,...closing].every(frame => frame.mainWidth === opening[0].mainWidth),
+   'drawer resized the chat while moving');
+  assert.equal(await sidebar.evaluate(el => el.inert), true);
+  assert.equal(await sidebarToggle.evaluate(el => el === document.activeElement), true);
+
+  // Reverse a closing transition while the drawer is still partway across the page.
+  await sidebarToggle.click();
+  await page.waitForFunction(id => document.getElementById(id).getBoundingClientRect().x === 0, sidebarId);
+  const reversed = await page.evaluate(async id => {
+   const drawer = document.getElementById(id);
+   const trigger = document.querySelector(`button[aria-controls="${id}"]`);
+   document.dispatchEvent(new KeyboardEvent('keydown', {key:'Escape', bubbles:true}));
+   for (let i = 0; i < 20; i++) {
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    const currentX = drawer.getBoundingClientRect().x;
+    if (currentX < -20 && currentX > -250) {
+     trigger.click();
+     await new Promise(resolve => requestAnimationFrame(resolve));
+     return {currentX, nextX:drawer.getBoundingClientRect().x};
+    }
+   }
+   throw new Error('No intermediate position found during closing');
+  }, sidebarId);
+  assert.ok(Math.abs(reversed.nextX - reversed.currentX) < 90, 'drawer jumped during reversal');
+  await page.waitForFunction(id => document.getElementById(id).getBoundingClientRect().x === 0, sidebarId);
+  await page.keyboard.press('Escape');
+  await sidebar.waitFor({state:'hidden'});
+
+  await page.emulateMedia({reducedMotion:'reduce'});
+  await sidebarToggle.click();
+  assert.equal(await sidebar.evaluate(el => getComputedStyle(el).transitionDuration), '0s, 0s');
+  assert.equal(await sidebar.evaluate(el => el.getBoundingClientRect().x), 0);
+  await page.keyboard.press('Escape');
+  assert.equal(await sidebar.evaluate(el => getComputedStyle(el).visibility), 'hidden');
+  await page.emulateMedia({reducedMotion:'no-preference'});
+
   const metrics=[];
   async function assertComposer(label,height){
    await settle();
@@ -64,11 +141,26 @@ const output=process.env.DS_LAYOUT_OUTPUT||path.join(root,'..','qa-keyboard');
    const tx=db.transaction(['sessions','sessionSummaries'],'readwrite');
    const now=Date.now();const session={id:'layout-fixture',title:'布局回归测试',createdAt:now,updatedAt:now,rootMessageId:'u1',messages:[{id:'u1',role:'user',content:'检查键盘与输入框的位置',files:[],createdAt:now,parentId:null,selectedChildId:'a1'},{id:'a1',role:'assistant',createdAt:now,model:'deepseek-flash',prefix:true,status:'done',parentId:'u1',blocks:[{type:'text',text:'这是一条用于检查布局的本地测试回答。'}]}]};
    tx.objectStore('sessions').put(session);tx.objectStore('sessionSummaries').put({id:session.id,title:session.title,createdAt:now,updatedAt:now,fileIds:[]});
+   for(let i=1;i<=24;i++){
+    tx.objectStore('sessionSummaries').put({id:`sidebar-fixture-${i}`,title:`侧栏会话 ${i}`,createdAt:now-i,updatedAt:now-i,fileIds:[]});
+   }
    await new Promise((r,j)=>{tx.oncomplete=r;tx.onerror=j});db.close();
   });
   await page.reload();await page.getByText('灵感，从这里开始').waitFor();
-  await page.getByRole('button',{name:'打开边栏',exact:true}).click();
+  await sidebarToggle.click();
+  const scrollPosition = await sidebar.evaluate(el => {
+   const list = [...el.querySelectorAll('div')].find(node => getComputedStyle(node).overflowY === 'auto');
+   list.scrollTop = 360;
+   return list.scrollTop;
+  });
+  assert.ok(scrollPosition > 0, 'session list should be scrollable');
+  await page.keyboard.press('Escape');
+  await sidebar.waitFor({state:'hidden'});
+  await sidebarToggle.click();
+  assert.equal(await sidebar.evaluate(el => [...el.querySelectorAll('div')].find(node => getComputedStyle(node).overflowY === 'auto').scrollTop), scrollPosition);
+  await sidebar.evaluate(el => { [...el.querySelectorAll('div')].find(node => getComputedStyle(node).overflowY === 'auto').scrollTop = 0; });
   await page.getByText('布局回归测试',{exact:true}).click();
+  await sidebar.waitFor({state:'hidden'});
   await page.getByText('这是一条用于检查布局的本地测试回答。',{exact:true}).waitFor();
   await checkKeyboardCycle('conversation');
   // A high keyboard / landscape height must still leave the composer usable.
@@ -80,6 +172,6 @@ const output=process.env.DS_LAYOUT_OUTPUT||path.join(root,'..','qa-keyboard');
   await page.getByLabel('Gemini API Key').focus();await settle();
   assert.equal(errors.length,0,errors.join('\n'));
   await fs.writeFile(path.join(output,'layout-metrics.json'),JSON.stringify(metrics,null,2));
-  console.log('PASS: production Chromium layout; 16 keyboard resize frames across welcome/conversation; input focus + header position; landscape; settings bounds.');
+  console.log('PASS: drawer slide, backdrop fade, reversal, reduced motion and scroll retention; production layout at 16 keyboard heights, landscape and settings.');
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exit(1)});

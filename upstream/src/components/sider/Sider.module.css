@@ -192,18 +192,68 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
 }
 
-.drawer {
+.drawerLayer {
+  --drawer-duration: 240ms;
   position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
+  inset: 0;
   z-index: 800;
+  pointer-events: none;
+}
+
+.drawer,
+.drawerMask {
+  position: absolute;
+  visibility: hidden;
+}
+
+.drawer {
+  inset: 0 auto 0 0;
+  box-shadow: 8px 0 24px rgba(15, 23, 42, 0.14);
+  transform: translate3d(calc(-100% - 32px), 0, 0);
+  transition:
+    transform var(--drawer-duration) var(--ds-ease-in-out),
+    visibility 0s linear var(--drawer-duration);
+
+  &:focus {
+    outline: none;
+  }
 }
 
 .drawerMask {
-  position: absolute;
   inset: 0;
-  z-index: 799;
+  background-color: rgba(15, 23, 42, 0.32);
+  opacity: 0;
+  touch-action: none;
+  transition:
+    opacity var(--drawer-duration) var(--ds-ease-in-out),
+    visibility 0s linear var(--drawer-duration);
+
+  [data-ds-dark-theme] & {
+    background-color: rgba(0, 0, 0, 0.52);
+  }
+}
+
+.drawerLayer[data-open='true'] {
+  .drawer,
+  .drawerMask {
+    visibility: visible;
+    transition-delay: 0s;
+    pointer-events: auto;
+  }
+
+  .drawer {
+    transform: translate3d(0, 0, 0);
+  }
+
+  .drawerMask {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .drawerLayer {
+    --drawer-duration: 0ms;
+  }
 }
 
 .mobile {
@@ -212,6 +262,10 @@
 
   .listWrap {
     margin-top: 16px;
+  }
+
+  .list {
+    overscroll-behavior-y: contain;
   }
 
   .sectionHeader {

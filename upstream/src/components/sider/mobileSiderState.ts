@@ -1,5 +1,7 @@
 import { create } from 'zustand'
 
+export const mobileSiderId = 'ds-mobile-sidebar'
+
 /** 移动端侧边栏抽屉：顶栏菜单按钮打开，点遮罩、切换会话或开启新对话后关闭 */
 export const useMobileSider = create(() => ({ open: false }))
 

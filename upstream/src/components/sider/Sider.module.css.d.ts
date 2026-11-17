@@ -14,6 +14,7 @@ declare const styles: {
   readonly "settingsLabel": string;
   readonly "collapsed": string;
   readonly "collapsedGroup": string;
+  readonly "drawerLayer": string;
   readonly "drawer": string;
   readonly "drawerMask": string;
   readonly "mobile": string;
