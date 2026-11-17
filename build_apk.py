@@ -31,7 +31,7 @@ for name in ['aapt2','zipalign','apksigner','d8']: (tools/name).chmod(0o755)
 assets=ROOT/'android/app/src/main/assets/web'
 shutil.rmtree(assets,ignore_errors=True);shutil.copytree(ROOT/'upstream/dist',assets)
 build=ROOT/'android/manual-build';shutil.rmtree(build,ignore_errors=True);(build/'classes').mkdir(parents=True);(build/'dex').mkdir()
-manifest=(ROOT/'android/app/src/main/AndroidManifest.xml').read_text().replace('<manifest ',f'<manifest package="app.dsmobile" android:versionCode="{release["version_code"]}" android:versionName="{release["version_name"]}" ',1)
+manifest=(ROOT/'android/app/src/main/AndroidManifest.xml').read_text().replace('<manifest ',f'<manifest package="{release["application_id"]}" android:versionCode="{release["version_code"]}" android:versionName="{release["version_name"]}" ',1)
 (build/'AndroidManifest.xml').write_text(manifest)
 run([tools/'aapt2','compile','--dir',ROOT/'android/app/src/main/res','-o',build/'resources.zip'])
 run([tools/'aapt2','link','-o',build/'unsigned.apk','-I',androidjar,'--manifest',build/'AndroidManifest.xml','-A',ROOT/'android/app/src/main/assets',build/'resources.zip'])

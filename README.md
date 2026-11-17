@@ -6,6 +6,8 @@
 
 Android 8.0+，建议使用较新的 Android System WebView。安装包和 SHA-256 校验文件见 [GitHub Releases](https://github.com/qianwangshengpaerna/ds-mobile/releases/latest)。
 
+v0.2.1 正式版可直接覆盖安装侧栏预览版，也可与 v0.2.0 共存。从 v0.2.0 迁移时，在旧版的「项目空间」选择「备份项目和全部聊天」，再到新版恢复备份。首次安装时请自行填写 API Key。
+
 ## 0.2.1 侧栏动画
 
 - 在手机上打开或关闭侧栏时，面板滑动，遮罩同步渐变。快速切换方向时，动画从当前位置继续。
