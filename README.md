@@ -4,11 +4,13 @@
 
 ## 下载
 
-应用版本：0.2.0（versionCode 3）。Android 8.0+，建议使用较新的 Android System WebView。
+Android 8.0+，建议使用较新的 Android System WebView。安装包和 SHA-256 校验文件见 [GitHub Releases](https://github.com/qianwangshengpaerna/ds-mobile/releases/latest)。
 
-下载安装包：[ds-mobile-v0.2.0.apk](downloads/ds-mobile-v0.2.0.apk?raw=true)。校验文件：[SHA256SUMS.txt](downloads/SHA256SUMS.txt)。安装包使用开发证书，源码不包含签名私钥。部署自己的发行版时请配置自己的签名并保管好私钥。
+## 0.2.1 侧栏动画
 
-当前 APK SHA-256：`1a9a493e25962f325df0dfe3c10c0965918778b3285335fc34f97f0eead64918`。
+- 在手机上打开或关闭侧栏时，面板滑动，遮罩同步渐变。快速切换方向时，动画从当前位置继续。
+- 保留会话列表滚动位置，开关侧栏时聊天区宽度保持稳定。
+- 支持返回键关闭侧栏、关闭后归还菜单按钮焦点，以及系统的减少动态效果设置。
 
 ## 0.2.0 新增功能
 
@@ -28,7 +30,7 @@
 
 ## 安装与使用
 
-1. 在 Android 8.0 或更新系统安装 `ds-mobile-v0.2.0.apk`。需要较新的 Android System WebView（建议 Chromium 120+）。安装包不区分 CPU 架构。
+1. 从 GitHub Releases 下载 APK，在 Android 8.0 或更新系统安装。需要较新的 Android System WebView（建议 Chromium 120+）。安装包不区分 CPU 架构。
 2. 点首页顶部 DeepSeek，分别填写 DeepSeek / Gemini API Key，选择供应商后保存。发送消息会验证服务是否可用。点击读取模型后从下拉列表选择；账号须有对应权限。
 3. 首页「导入 DeepSeek ZIP」可以直接选择 DeepSeek 原应用导出的历史记录压缩包，无需解压。也可从项目空间进入导入设置。
 4. 「项目空间」中新建项目、设置专属指令；新对话自动归入当前项目。已有对话可移动，侧边栏按当前项目筛选。删除项目只移除分组，保留聊天。
@@ -85,6 +87,7 @@ python3 build_apk.py
 也可 `python3 build_apk.py --web` 一次构建。脚本输出位于项目文件夹的上一级。使用已有 SDK 时设置 `DS_ANDROID_TOOLS`（包含 aapt2、d8 等）及 `DS_ANDROID_JAR`（android.jar 的完整路径）。Android Studio 构建前先把 `upstream/dist/` 内容复制到 `android/app/src/main/assets/web/`，命令行脚本会自动完成复制。
 
 安装包采用本地开发证书签名，通过 APK v2 / v3 签名校验。源码包不包含私钥；重新构建会生成自己的证书，不能直接覆盖不同证书签名的旧版本，先备份数据。正式分发应自行配置并长期保存发行签名。
+使用 `python3 build_apk.py --unsigned` 可生成已对齐的待签名 APK。覆盖升级时，签名证书须与已安装版本一致。
 
 运行不消耗真实 API 额度的测试：
 
