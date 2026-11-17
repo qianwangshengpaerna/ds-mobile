@@ -40,6 +40,7 @@ export const SessionItem = memo(function SessionItem({
           if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
             finish(event.currentTarget.value)
           } else if (event.key === 'Escape') {
+            event.stopPropagation()
             setEditing(false)
           }
         }}

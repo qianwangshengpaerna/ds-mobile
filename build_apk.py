@@ -8,7 +8,10 @@ fetches pinned SDK archives over HTTPS and verifies SHA256 recorded at creation.
 import argparse,hashlib,json,os,pathlib,shutil,subprocess,zipfile
 ROOT=pathlib.Path(__file__).resolve().parent
 release=json.loads((ROOT/'version.json').read_text())
-p=argparse.ArgumentParser();p.add_argument('--web',action='store_true');a=p.parse_args()
+p = argparse.ArgumentParser()
+p.add_argument('--web', action='store_true')
+p.add_argument('--unsigned', action='store_true', help='build an aligned APK for release signing')
+a = p.parse_args()
 def run(args,cwd=ROOT):subprocess.run([str(x) for x in args],cwd=cwd,check=True)
 if a.web:
  run(['npm','ci'],ROOT/'upstream');run(['npm','run','build'],ROOT/'upstream')
@@ -28,7 +31,7 @@ for name in ['aapt2','zipalign','apksigner','d8']: (tools/name).chmod(0o755)
 assets=ROOT/'android/app/src/main/assets/web'
 shutil.rmtree(assets,ignore_errors=True);shutil.copytree(ROOT/'upstream/dist',assets)
 build=ROOT/'android/manual-build';shutil.rmtree(build,ignore_errors=True);(build/'classes').mkdir(parents=True);(build/'dex').mkdir()
-manifest=(ROOT/'android/app/src/main/AndroidManifest.xml').read_text().replace('<manifest ',f'<manifest package="app.dsmobile" android:versionCode="{release["version_code"]}" android:versionName="{release["version_name"]}" ',1)
+manifest=(ROOT/'android/app/src/main/AndroidManifest.xml').read_text().replace('<manifest ',f'<manifest package="{release["application_id"]}" android:versionCode="{release["version_code"]}" android:versionName="{release["version_name"]}" ',1)
 (build/'AndroidManifest.xml').write_text(manifest)
 run([tools/'aapt2','compile','--dir',ROOT/'android/app/src/main/res','-o',build/'resources.zip'])
 run([tools/'aapt2','link','-o',build/'unsigned.apk','-I',androidjar,'--manifest',build/'AndroidManifest.xml','-A',ROOT/'android/app/src/main/assets',build/'resources.zip'])
@@ -44,6 +47,12 @@ run(['java','-cp',tools/'lib/d8.jar','com.android.tools.r8.D8','--lib',androidja
 with zipfile.ZipFile(build/'unsigned.apk','a',zipfile.ZIP_DEFLATED) as z:
  for f in (build/'dex').glob('*.dex'):z.write(f,f.name)
 run([tools/'zipalign','-f','4',build/'unsigned.apk',build/'aligned.apk'])
+if a.unsigned:
+    out = ROOT.parent / f'ds-mobile-v{release["version_name"]}-unsigned.apk'
+    shutil.copyfile(build / 'aligned.apk', out)
+    print(out)
+    raise SystemExit(0)
+
 # Local development certificate; never use it for store releases. Keep it outside the source archive.
 keystore=ROOT/'.signing/dev.jks';keystore.parent.mkdir(exist_ok=True)
 if not keystore.exists():run(['keytool','-genkeypair','-keystore',keystore,'-storepass','android','-alias','dsmobile','-keypass','android','-keyalg','RSA','-keysize','3072','-validity','10000','-dname','CN=ds mobile Development'])

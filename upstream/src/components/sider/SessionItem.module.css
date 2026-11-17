@@ -10,6 +10,9 @@
   line-height: 22px;
   color: var(--dsw-alias-label-primary);
   cursor: pointer;
+  transition:
+    background-color 160ms var(--ds-ease-in-out),
+    color 160ms var(--ds-ease-in-out);
 
   &.active {
     background-color: var(--dsw-specific-sidebar-nav-item-active-accent);
@@ -27,6 +30,12 @@
         display: flex;
       }
     }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transition: none;
   }
 }
 
